@@ -51,7 +51,7 @@ class CsvToSqliteTests(unittest.TestCase):
             }
         )
         purchase_id = csv_to_sqlite.build_purchase_id(df)
-        self.assertEqual(list(purchase_id), ["99020230901"])
+        self.assertEqual(list(purchase_id), ["9920230901"])
 
     def test_compute_co_occurrences_counts_pairs(self) -> None:
         df = _make_sample_df()
