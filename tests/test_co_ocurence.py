@@ -7,7 +7,12 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app import CoOccurrenceStore
+from app import (
+    CoOccurrenceStore,
+    are_often_copurchased,
+    top_pairs,
+    top_with_item,
+)
 
 
 class CoOccurrenceStoreTests(unittest.TestCase):
@@ -97,6 +102,44 @@ class CoOccurrenceStoreTests(unittest.TestCase):
         self.assertEqual(store.items(), ["bread"])
         self.assertEqual(store.get_count("bread", "bread"), 0)
         self.assertEqual(store.get_count("bread", "milk"), 0)
+
+    def test_top_with_item_orders_by_count_and_name(self) -> None:
+        store = CoOccurrenceStore()
+        store.add_transaction(["bread", "milk", "butter"])
+        store.add_transaction(["bread", "milk"])
+        store.add_transaction(["bread", "cheese"])
+        store.add_transaction(["bread", "butter"])  # butter now ties with milk
+
+        result = top_with_item(store, "bread", limit=3)
+        self.assertEqual(
+            result,
+            [("butter", 2), ("milk", 2), ("cheese", 1)],
+        )
+
+    def test_top_pairs_returns_global_ranking(self) -> None:
+        store = CoOccurrenceStore()
+        store.add_transaction(["bread", "milk", "butter"])
+        store.add_transaction(["bread", "milk"])
+        store.add_transaction(["bread", "butter"])
+        store.add_transaction(["eggs", "bacon"])
+
+        result = top_pairs(store, limit=2)
+        self.assertEqual(
+            result,
+            [
+                (("bread", "butter"), 2),
+                (("bread", "milk"), 2),
+            ],
+        )
+
+    def test_are_often_copurchased_predicate(self) -> None:
+        store = CoOccurrenceStore()
+        store.add_transaction(["bread", "milk"])
+        store.add_transaction(["bread", "milk"])
+        store.add_transaction(["bread", "butter"])
+
+        self.assertTrue(are_often_copurchased(store, "bread", "milk", min_count=2))
+        self.assertFalse(are_often_copurchased(store, "bread", "butter", min_count=2))
 
 
 if __name__ == "__main__":
