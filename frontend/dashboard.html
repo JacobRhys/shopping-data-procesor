@@ -310,6 +310,15 @@
       <div class="lede">Enter a basket (comma-separated) to get tailored suggestions.</div>
       {% endif %}
     </div>
+
+    <div class="section">
+      <h2>3D Network</h2>
+      {% if network_html %}
+      {{ network_html|safe }}
+      {% else %}
+      <div class="lede">Load data to view the 3D co-occurrence network.</div>
+      {% endif %}
+    </div>
   </div>
 </body>
 
