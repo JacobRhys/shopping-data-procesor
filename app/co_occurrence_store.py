@@ -30,11 +30,17 @@ class CoOccurrenceStore:
 
     def add_item(self, name: str) -> int:
         '''Add an item name if missing and return its ID.'''
-        pass
+        if name in self._item_to_id:
+            return self._item_to_id[name]
+
+        new_id = len(self._id_to_item)
+        self._item_to_id[name] = new_id
+        self._id_to_item.append(name)
+        return new_id
 
     def _get_or_create_id(self, name: str) -> int:
-        pass
-    
+        return self.add_item(name)
+
     def add_pair(self, item_a: str, item_b: str) -> None:
         '''
         Increment the co-occurrence count for a pair of item names.
@@ -42,7 +48,17 @@ class CoOccurrenceStore:
         Pairs are stored in ordered ID form (min_id, max_id) to keep the
         structure symmetric. Self-pairs are ignored.
         '''
-        pass
+        if item_a == item_b:
+            # Record the item but do not count self-pairs.
+            self.add_item(item_a)
+            return
+
+        a_id = self._get_or_create_id(item_a)
+        b_id = self._get_or_create_id(item_b)
+        low, high = sorted((a_id, b_id))
+
+        inner = self._counts[low]
+        inner[high] = inner.get(high, 0) + 1
 
     def add_transaction(self, items: Iterable[str]) -> None:
         '''
@@ -50,17 +66,26 @@ class CoOccurrenceStore:
 
         Duplicate items within the same transaction are deduplicated.
         '''
-        pass
+        unique_items_in_order = dict.fromkeys(items)
+        for item_a, item_b in combinations(unique_items_in_order, 2):
+            self.add_pair(item_a, item_b)
 
     def get_count(self, item_a: str, item_b: str) -> int:
         '''Return the frequency for a pair of item names (0 if unseen).'''
-        pass
+        if item_a not in self._item_to_id or item_b not in self._item_to_id:
+            return 0
+
+        a_id = self._item_to_id[item_a]
+        b_id = self._item_to_id[item_b]
+        low, high = sorted((a_id, b_id))
+        return self._counts.get(low, {}).get(high, 0)
 
     def iter_pairs(self) -> Iterator[Tuple[Tuple[str, str], int]]:
         '''Yield ((item_a, item_b), count) for all stored pairs.'''
-        pass
+        for low_id, inner in self._counts.items():
+            for high_id, count in inner.items():
+                yield (self._id_to_item[low_id], self._id_to_item[high_id]), count
 
     def items(self) -> List[str]:
         '''Return all known item names in ID order.'''
-        pass
-
+        return list(self._id_to_item)
