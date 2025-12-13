@@ -19,6 +19,8 @@ from pathlib import Path
 from typing import Iterable, Optional
 
 import pandas as pd
+import shlex
+import numpy as np
 
 # Allow running as a script by ensuring package is on sys.path.
 if __package__ is None or __package__ == "":
@@ -27,7 +29,12 @@ if __package__ is None or __package__ == "":
 from app import (  # type: ignore
     CoOccurrenceStore,
     are_often_copurchased,
+    build_dense_matrix,
     compute_co_occurrences,
+    compute_svd_embeddings,
+    recommend_for_basket,
+    recommend_for_customer,
+    recommend_for_item,
     top_pairs,
     top_with_item,
     write_sqlite,
@@ -51,6 +58,9 @@ def help_command() -> None:
         ("count", "Count for an item pair", "item_a item_b"),
         ("visualize", "Launch 3D graph viewer", "prompts for options"),
         ("related", "BFS up to depth for related items", "item [depth]"),
+        ("rec_item", "Embedding-based rec for one item", "item [k]"),
+        ("rec_basket", "Embedding rec for basket (comma-separated)", "item1,item2,... [k]"),
+        ("rec_customer", "Embedding rec for purchased items", "item1,item2,... [k]"),
     ]
     print(table_draw(header + commands))
 
@@ -86,13 +96,19 @@ def run_loop(command_source: Optional[Iterable[str]] = None) -> None:
 
     commands_iter = iter(command_source) if command_source is not None else None
     store: Optional[CoOccurrenceStore] = None
+    embeddings = None
+    items_for_emb = None
     current_db = SQLITE_PATH
 
     while True:
         raw = next(commands_iter) if commands_iter is not None else input(">>> ")
         if raw is None:
             continue
-        parts = raw.strip().split()
+        try:
+            parts = shlex.split(raw)
+        except ValueError as exc:
+            print(f"Error parsing input: {exc}")
+            continue
         if not parts:
             continue
 
@@ -116,6 +132,8 @@ def run_loop(command_source: Optional[Iterable[str]] = None) -> None:
                 db_arg = Path(args[0]) if args else current_db
                 store = load_store(db_arg)
                 current_db = db_arg
+                embeddings = None
+                items_for_emb = None
                 print(f"Loaded store from {db_arg}")
             elif cmd == "stats":
                 if store is None:
@@ -170,6 +188,57 @@ def run_loop(command_source: Optional[Iterable[str]] = None) -> None:
                     print(f"Items within depth {depth} of '{item}': {', '.join(neighbors)}")
                 else:
                     print(f"No related items within depth {depth} for '{item}'.")
+            elif cmd == "rec_item":
+                if store is None:
+                    print("No store loaded. Use 'load' first.")
+                    continue
+                if not args:
+                    print("Usage: rec_item <item> [k]")
+                    continue
+                item = args[0]
+                k = int(args[1]) if len(args) >= 2 else 5
+                if embeddings is None or items_for_emb is None:
+                    mat, items_for_emb = build_dense_matrix(store)
+                    embeddings = compute_svd_embeddings(mat, k=min(20, len(items_for_emb)))
+                recs = recommend_for_item(items_for_emb, embeddings, item, top_k=k)
+                if recs:
+                    print(table_draw([("Item", "Similarity")] + [(n, f"{s:.3f}") for n, s in recs]))
+                else:
+                    print(f"No recommendations for '{item}'.")
+            elif cmd == "rec_basket":
+                if store is None:
+                    print("No store loaded. Use 'load' first.")
+                    continue
+                if not args:
+                    print("Usage: rec_basket <item1,item2,...> [k]")
+                    continue
+                basket_items = [p.strip() for p in args[0].split(",") if p.strip()]
+                k = int(args[1]) if len(args) >= 2 else 5
+                if embeddings is None or items_for_emb is None:
+                    mat, items_for_emb = build_dense_matrix(store)
+                    embeddings = compute_svd_embeddings(mat, k=min(20, len(items_for_emb)))
+                recs = recommend_for_basket(items_for_emb, embeddings, basket_items, top_k=k)
+                if recs:
+                    print(table_draw([("Item", "Similarity")] + [(n, f"{s:.3f}") for n, s in recs]))
+                else:
+                    print("No basket recommendations.")
+            elif cmd == "rec_customer":
+                if store is None:
+                    print("No store loaded. Use 'load' first.")
+                    continue
+                if not args:
+                    print("Usage: rec_customer <item1,item2,...> [k]")
+                    continue
+                purchased = [p.strip() for p in args[0].split(",") if p.strip()]
+                k = int(args[1]) if len(args) >= 2 else 5
+                if embeddings is None or items_for_emb is None:
+                    mat, items_for_emb = build_dense_matrix(store)
+                    embeddings = compute_svd_embeddings(mat, k=min(20, len(items_for_emb)))
+                recs = recommend_for_customer(items_for_emb, embeddings, purchased, top_k=k)
+                if recs:
+                    print(table_draw([("Item", "Similarity")] + [(n, f"{s:.3f}") for n, s in recs]))
+                else:
+                    print("No customer recommendations.")
             else:
                 print(f"Unknown command: {cmd}. Type 'help' for options.")
         except Exception as exc:

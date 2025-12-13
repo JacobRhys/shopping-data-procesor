@@ -80,6 +80,23 @@ class MainCLITests(unittest.TestCase):
         self.assertIn("Goodbye!", output)
         self.assertTrue(called.get("ran", False))
 
+    def test_embedding_recommendations(self) -> None:
+        output = self._run_with_commands(
+            [
+                "load",
+                "rec_item a 2",
+                "rec_basket a,b 2",
+                "rec_customer a 2",
+                "quit",
+            ]
+        )
+        self.assertIn("Similarity", output)
+        self.assertIn("Goodbye!", output)
+
+    def test_related_with_spaces_uses_shlex(self) -> None:
+        output = self._run_with_commands(['load', 'related "a b"', 'quit'])
+        self.assertIn("No related items within depth", output)
+
     def test_related_command_uses_bfs(self) -> None:
         output = self._run_with_commands(
             ["load", "related a 2", "related z 1", "quit"]

@@ -15,6 +15,7 @@ from app.embedding_cpu import (  # type: ignore
     compute_svd_embeddings,
     recommend_for_basket,
     recommend_for_item,
+    recommend_for_customer,
 )
 
 
@@ -55,6 +56,14 @@ class EmbeddingTests(unittest.TestCase):
         # No recommendations should include existing basket items.
         rec_item_names = {r[0] for r in recs}
         self.assertFalse({"a", "b"} & rec_item_names)
+
+    def test_recommend_for_customer(self) -> None:
+        mat, items = build_dense_matrix(self.store)
+        emb = compute_svd_embeddings(mat, k=2)
+        recs = recommend_for_customer(items, emb, ["a"], top_k=2)
+        self.assertTrue(recs)
+        rec_item_names = {r[0] for r in recs}
+        self.assertNotIn("a", rec_item_names)
 
 
 if __name__ == "__main__":

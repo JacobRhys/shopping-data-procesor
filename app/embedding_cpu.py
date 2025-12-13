@@ -107,3 +107,30 @@ def recommend_for_basket(
         (items[candidate_idx[i]], float(sims[i]))
         for i in order
     ]
+
+
+def recommend_for_customer(
+    items: Sequence[str],
+    embeddings: np.ndarray,
+    purchased: Iterable[str],
+    top_k: int = 5,
+) -> List[Tuple[str, float]]:
+    """
+    Recommend items not yet purchased by averaging embeddings of all purchased items.
+    """
+    name_to_idx = {name: i for i, name in enumerate(items)}
+    idxs = [name_to_idx[p] for p in purchased if p in name_to_idx]
+    if not idxs or top_k <= 0:
+        return []
+
+    vecs = _normalize_rows(embeddings)
+    profile = vecs[idxs].mean(axis=0)
+    candidate_idx = [i for i in range(len(items)) if i not in idxs]
+    if not candidate_idx:
+        return []
+    sims = vecs[candidate_idx] @ profile
+    order = np.argsort(-sims)[:top_k]
+    return [
+        (items[candidate_idx[i]], float(sims[i]))
+        for i in order
+    ]

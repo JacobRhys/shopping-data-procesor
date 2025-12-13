@@ -9,6 +9,7 @@ from .embedding_cpu import (
     compute_svd_embeddings,
     recommend_for_item,
     recommend_for_basket,
+    recommend_for_customer,
 )
 
 __all__ = [
@@ -24,4 +25,5 @@ __all__ = [
     "compute_svd_embeddings",
     "recommend_for_item",
     "recommend_for_basket",
+    "recommend_for_customer",
 ]
