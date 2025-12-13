@@ -103,6 +103,20 @@ class CoOccurrenceStoreTests(unittest.TestCase):
         self.assertEqual(store.get_count("bread", "bread"), 0)
         self.assertEqual(store.get_count("bread", "milk"), 0)
 
+    def test_bfs_related_traverses_depth(self) -> None:
+        store = CoOccurrenceStore()
+        store.add_transaction(["a", "b"])
+        store.add_transaction(["b", "c"])
+        store.add_transaction(["c", "d"])
+
+        depth1 = store.bfs_related("a", depth=1)
+        depth2 = store.bfs_related("a", depth=2)
+        depth3 = store.bfs_related("a", depth=3)
+
+        self.assertEqual(depth1, ["b"])
+        self.assertEqual(depth2, ["b", "c"])
+        self.assertEqual(depth3, ["b", "c", "d"])
+
     def test_top_with_item_orders_by_count_and_name(self) -> None:
         store = CoOccurrenceStore()
         store.add_transaction(["bread", "milk", "butter"])

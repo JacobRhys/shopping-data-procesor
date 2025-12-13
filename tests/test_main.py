@@ -80,6 +80,13 @@ class MainCLITests(unittest.TestCase):
         self.assertIn("Goodbye!", output)
         self.assertTrue(called.get("ran", False))
 
+    def test_related_command_uses_bfs(self) -> None:
+        output = self._run_with_commands(
+            ["load", "related a 2", "related z 1", "quit"]
+        )
+        self.assertIn("Items within depth 2 of 'a'", output)
+        self.assertIn("No related items within depth 1 for 'z'", output)
+
 
 if __name__ == "__main__":
     unittest.main()

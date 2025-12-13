@@ -50,6 +50,7 @@ def help_command() -> None:
         ("top_pairs", "Top pairs overall", "[k]"),
         ("count", "Count for an item pair", "item_a item_b"),
         ("visualize", "Launch 3D graph viewer", "prompts for options"),
+        ("related", "BFS up to depth for related items", "item [depth]"),
     ]
     print(table_draw(header + commands))
 
@@ -155,6 +156,20 @@ def run_loop(command_source: Optional[Iterable[str]] = None) -> None:
                     print("They co-occur at least once.")
             elif cmd == "visualize":
                 visualize_interactive()
+            elif cmd == "related":
+                if store is None:
+                    print("No store loaded. Use 'load' first.")
+                    continue
+                if not args:
+                    print("Usage: related <item> [depth]")
+                    continue
+                item = args[0]
+                depth = int(args[1]) if len(args) >= 2 else 2
+                neighbors = store.bfs_related(item, depth=depth)
+                if neighbors:
+                    print(f"Items within depth {depth} of '{item}': {', '.join(neighbors)}")
+                else:
+                    print(f"No related items within depth {depth} for '{item}'.")
             else:
                 print(f"Unknown command: {cmd}. Type 'help' for options.")
         except Exception as exc:

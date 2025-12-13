@@ -108,3 +108,31 @@ class CoOccurrenceStore:
     def items(self) -> List[str]:
         '''Return all known item names in ID order.'''
         return list(self._id_to_item)
+
+    def bfs_related(self, start: str, depth: int = 2) -> List[str]:
+        '''
+        Breadth-first traversal over the co-occurrence graph up to a depth.
+        Returns a list of item names reachable within the given depth (excluding start).
+        '''
+        if start not in self._item_to_id or depth <= 0:
+            return []
+
+        visited = set([start])
+        frontier = [start]
+        for _ in range(depth):
+            next_frontier = []
+            for current in frontier:
+                for (a, b), _ in self.iter_pairs():
+                    neighbor = None
+                    if a == current:
+                        neighbor = b
+                    elif b == current:
+                        neighbor = a
+                    if neighbor and neighbor not in visited:
+                        visited.add(neighbor)
+                        next_frontier.append(neighbor)
+            frontier = next_frontier
+            if not frontier:
+                break
+        visited.discard(start)
+        return sorted(visited)
