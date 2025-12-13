@@ -60,6 +60,25 @@ class CoOccurrenceStore:
         inner = self._counts[low]
         inner[high] = inner.get(high, 0) + 1
 
+    def add_pair_count(self, item_a: str, item_b: str, count: int) -> None:
+        '''
+        Increment the co-occurrence count by a specific amount.
+
+        Useful when restoring from persistence where counts are already aggregated.
+        '''
+        if count <= 0:
+            return
+        if item_a == item_b:
+            self.add_item(item_a)
+            return
+
+        a_id = self._get_or_create_id(item_a)
+        b_id = self._get_or_create_id(item_b)
+        low, high = sorted((a_id, b_id))
+
+        inner = self._counts[low]
+        inner[high] = inner.get(high, 0) + count
+
     def add_transaction(self, items: Iterable[str]) -> None:
         '''
         Update counts for all unique item pairs in a single transaction.

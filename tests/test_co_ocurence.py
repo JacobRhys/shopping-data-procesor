@@ -76,6 +76,28 @@ class CoOccurrenceStoreTests(unittest.TestCase):
             },
         )
 
+    def test_add_pair_count_accumulates_existing_pairs(self) -> None:
+        store = CoOccurrenceStore()
+        store.add_pair("bread", "milk")
+
+        store.add_pair_count("bread", "milk", 3)
+
+        self.assertEqual(store.get_count("bread", "milk"), 4)
+        # Adding with reversed order should still increment the same pair.
+        store.add_pair_count("milk", "bread", 2)
+        self.assertEqual(store.get_count("bread", "milk"), 6)
+
+    def test_add_pair_count_ignores_non_positive_and_handles_self_pairs(self) -> None:
+        store = CoOccurrenceStore()
+
+        store.add_pair_count("bread", "bread", 5)  # should only register item
+        store.add_pair_count("bread", "milk", 0)   # ignored
+        store.add_pair_count("bread", "milk", -2)  # ignored
+
+        self.assertEqual(store.items(), ["bread"])
+        self.assertEqual(store.get_count("bread", "bread"), 0)
+        self.assertEqual(store.get_count("bread", "milk"), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
