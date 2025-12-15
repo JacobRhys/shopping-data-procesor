@@ -1,6 +1,9 @@
 # Supermarket Co-occurrence Explorer
 This project, provides a CLI for quick queries, an embeddings system for recommendations, and a small Flask dashboard with a 3D network view.
 
+**demo video**
+[![Demo video](https://img.youtube.com/vi/TdDTm1TVY3k/0.jpg)](https://youtu.be/TdDTm1TVY3k)
+
 ## Repository layout
 - `app/`: core logic — CSV to SQLite conversion, in-memory co-occurrence store, query helpers, embeddings, CLI loop, and 3D visualizer hooks.
 - `data/`: input CSV (`Supermarket_dataset_PAI.csv`) and the generated SQLite DB (`co_occurrences.sqlite`).
