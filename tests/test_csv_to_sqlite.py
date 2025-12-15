@@ -6,9 +6,9 @@ import unittest
 from collections import Counter
 from pathlib import Path
 from typing import Dict
+from unittest import mock
 
 import pandas as pd
-from unittest import mock
 
 # Ensure project root is on sys.path for `app` imports when tests run from anywhere.
 ROOT = Path(__file__).resolve().parents[1]
@@ -70,7 +70,9 @@ class CsvToSqliteTests(unittest.TestCase):
             ),
         )
 
-    def test_compute_co_occurrences_ignores_duplicate_items_in_same_purchase(self) -> None:
+    def test_compute_co_occurrences_ignores_duplicate_items_in_same_purchase(
+        self,
+    ) -> None:
         df = pd.DataFrame(
             {
                 "Member_number": [1, 1, 1],
@@ -128,10 +130,14 @@ class CsvToSqliteTests(unittest.TestCase):
 
             _make_sample_df().to_csv(csv_path, index=False)
 
-            with mock.patch.object(csv_to_sqlite, "CSV_PATH", csv_path), mock.patch.object(
+            with mock.patch.object(
+                csv_to_sqlite, "CSV_PATH", csv_path
+            ), mock.patch.object(
                 csv_to_sqlite, "SQLITE_PATH", out_path
             ), mock.patch.object(
-                csv_to_sqlite, "parse_args", return_value=argparse.Namespace(csv_path=None, out=None)
+                csv_to_sqlite,
+                "parse_args",
+                return_value=argparse.Namespace(csv_path=None, out=None),
             ):
                 csv_to_sqlite.main()
 

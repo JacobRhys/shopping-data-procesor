@@ -2,8 +2,8 @@ import io
 import sys
 import types
 import unittest
-from pathlib import Path
 from contextlib import redirect_stdout
+from pathlib import Path
 
 # Ensure project root is on sys.path for imports.
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,7 +23,9 @@ class MainCLITests(unittest.TestCase):
         store.add_transaction(["b", "c"])
         self.store = store
 
-    def _run_with_commands(self, commands, monkeypatch_store=True, monkeypatch_visualize=True):
+    def _run_with_commands(
+        self, commands, monkeypatch_store=True, monkeypatch_visualize=True
+    ):
         buf = io.StringIO()
         original_load = main.load_store
         original_visualize = main.visualize_interactive
@@ -94,13 +96,11 @@ class MainCLITests(unittest.TestCase):
         self.assertIn("Goodbye!", output)
 
     def test_related_with_spaces_uses_shlex(self) -> None:
-        output = self._run_with_commands(['load', 'related "a b"', 'quit'])
+        output = self._run_with_commands(["load", 'related "a b"', "quit"])
         self.assertIn("No related items within depth", output)
 
     def test_related_command_uses_bfs(self) -> None:
-        output = self._run_with_commands(
-            ["load", "related a 2", "related z 1", "quit"]
-        )
+        output = self._run_with_commands(["load", "related a 2", "related z 1", "quit"])
         self.assertIn("Items within depth 2 of 'a'", output)
         self.assertIn("No related items within depth 1 for 'z'", output)
 
