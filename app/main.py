@@ -14,35 +14,28 @@ Commands (type `help` inside the CLI):
 
 from __future__ import annotations
 
+import shlex
 import sys
 from pathlib import Path
 from typing import Iterable, Optional
 
-import pandas as pd
-import shlex
 import numpy as np
+import pandas as pd
 
 # Allow running as a script by ensuring package is on sys.path.
 if __package__ is None or __package__ == "":
     sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from app import (  # type: ignore
-    CoOccurrenceStore,
-    are_often_copurchased,
-    build_dense_matrix,
-    compute_co_occurrences,
-    compute_svd_embeddings,
-    recommend_for_basket,
-    recommend_for_customer,
-    recommend_for_item,
-    top_pairs,
-    top_with_item,
-    write_sqlite,
-)
+from app import (CoOccurrenceStore, are_often_copurchased,  # type: ignore
+                 build_dense_matrix, compute_co_occurrences,
+                 compute_svd_embeddings, recommend_for_basket,
+                 recommend_for_customer, recommend_for_item, top_pairs,
+                 top_with_item, write_sqlite)
 from app.asci_table import table_draw  # type: ignore
 from app.csv_to_sqlite import CSV_PATH, SQLITE_PATH
 from app.sqlite_to_coo import load_store  # type: ignore
-from app.visualize_graph import run_interactive as visualize_interactive  # type: ignore
+from app.visualize_graph import \
+    run_interactive as visualize_interactive  # type: ignore
 
 
 def help_command() -> None:
@@ -59,7 +52,11 @@ def help_command() -> None:
         ("visualize", "Launch 3D graph viewer", "prompts for options"),
         ("related", "BFS up to depth for related items", "item [depth]"),
         ("rec_item", "Embedding-based rec for one item", "item [k]"),
-        ("rec_basket", "Embedding rec for basket (comma-separated)", "item1,item2,... [k]"),
+        (
+            "rec_basket",
+            "Embedding rec for basket (comma-separated)",
+            "item1,item2,... [k]",
+        ),
         ("rec_customer", "Embedding rec for purchased items", "item1,item2,... [k]"),
     ]
     print(table_draw(header + commands))
@@ -185,7 +182,9 @@ def run_loop(command_source: Optional[Iterable[str]] = None) -> None:
                 depth = int(args[1]) if len(args) >= 2 else 2
                 neighbors = store.bfs_related(item, depth=depth)
                 if neighbors:
-                    print(f"Items within depth {depth} of '{item}': {', '.join(neighbors)}")
+                    print(
+                        f"Items within depth {depth} of '{item}': {', '.join(neighbors)}"
+                    )
                 else:
                     print(f"No related items within depth {depth} for '{item}'.")
             elif cmd == "rec_item":
@@ -199,10 +198,17 @@ def run_loop(command_source: Optional[Iterable[str]] = None) -> None:
                 k = int(args[1]) if len(args) >= 2 else 5
                 if embeddings is None or items_for_emb is None:
                     mat, items_for_emb = build_dense_matrix(store)
-                    embeddings = compute_svd_embeddings(mat, k=min(20, len(items_for_emb)))
+                    embeddings = compute_svd_embeddings(
+                        mat, k=min(20, len(items_for_emb))
+                    )
                 recs = recommend_for_item(items_for_emb, embeddings, item, top_k=k)
                 if recs:
-                    print(table_draw([("Item", "Similarity")] + [(n, f"{s:.3f}") for n, s in recs]))
+                    print(
+                        table_draw(
+                            [("Item", "Similarity")]
+                            + [(n, f"{s:.3f}") for n, s in recs]
+                        )
+                    )
                 else:
                     print(f"No recommendations for '{item}'.")
             elif cmd == "rec_basket":
@@ -216,10 +222,19 @@ def run_loop(command_source: Optional[Iterable[str]] = None) -> None:
                 k = int(args[1]) if len(args) >= 2 else 5
                 if embeddings is None or items_for_emb is None:
                     mat, items_for_emb = build_dense_matrix(store)
-                    embeddings = compute_svd_embeddings(mat, k=min(20, len(items_for_emb)))
-                recs = recommend_for_basket(items_for_emb, embeddings, basket_items, top_k=k)
+                    embeddings = compute_svd_embeddings(
+                        mat, k=min(20, len(items_for_emb))
+                    )
+                recs = recommend_for_basket(
+                    items_for_emb, embeddings, basket_items, top_k=k
+                )
                 if recs:
-                    print(table_draw([("Item", "Similarity")] + [(n, f"{s:.3f}") for n, s in recs]))
+                    print(
+                        table_draw(
+                            [("Item", "Similarity")]
+                            + [(n, f"{s:.3f}") for n, s in recs]
+                        )
+                    )
                 else:
                     print("No basket recommendations.")
             elif cmd == "rec_customer":
@@ -233,10 +248,19 @@ def run_loop(command_source: Optional[Iterable[str]] = None) -> None:
                 k = int(args[1]) if len(args) >= 2 else 5
                 if embeddings is None or items_for_emb is None:
                     mat, items_for_emb = build_dense_matrix(store)
-                    embeddings = compute_svd_embeddings(mat, k=min(20, len(items_for_emb)))
-                recs = recommend_for_customer(items_for_emb, embeddings, purchased, top_k=k)
+                    embeddings = compute_svd_embeddings(
+                        mat, k=min(20, len(items_for_emb))
+                    )
+                recs = recommend_for_customer(
+                    items_for_emb, embeddings, purchased, top_k=k
+                )
                 if recs:
-                    print(table_draw([("Item", "Similarity")] + [(n, f"{s:.3f}") for n, s in recs]))
+                    print(
+                        table_draw(
+                            [("Item", "Similarity")]
+                            + [(n, f"{s:.3f}") for n, s in recs]
+                        )
+                    )
                 else:
                     print("No customer recommendations.")
             else:

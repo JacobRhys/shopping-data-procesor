@@ -20,8 +20,8 @@ else:
 def _require_visual_deps():
     try:
         import matplotlib.pyplot as plt  # type: ignore
-        from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
         import networkx as nx  # type: ignore
+        from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
     except ImportError as exc:
         raise ImportError(
             "Visualization requires matplotlib and networkx. "
@@ -40,9 +40,7 @@ def build_graph(
     _, nx = _require_visual_deps()
 
     pairs = [
-        ((a, b), count)
-        for (a, b), count in store.iter_pairs()
-        if count >= min_count
+        ((a, b), count) for (a, b), count in store.iter_pairs() if count >= min_count
     ]
     pairs.sort(key=lambda entry: -entry[1])
     if top_edges is not None:

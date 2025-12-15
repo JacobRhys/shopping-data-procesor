@@ -1,16 +1,13 @@
 """App package exports."""
 
-from .csv_to_sqlite import build_purchase_id, compute_co_occurrences, write_sqlite
 from .co_occurrence_store import CoOccurrenceStore
-from .sqlite_to_coo import load_store
+from .csv_to_sqlite import (build_purchase_id, compute_co_occurrences,
+                            write_sqlite)
+from .embedding_cpu import (build_dense_matrix, compute_svd_embeddings,
+                            recommend_for_basket, recommend_for_customer,
+                            recommend_for_item)
 from .query import are_often_copurchased, top_pairs, top_with_item
-from .embedding_cpu import (
-    build_dense_matrix,
-    compute_svd_embeddings,
-    recommend_for_item,
-    recommend_for_basket,
-    recommend_for_customer,
-)
+from .sqlite_to_coo import load_store
 
 __all__ = [
     "build_purchase_id",

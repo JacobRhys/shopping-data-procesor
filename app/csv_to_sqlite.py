@@ -6,13 +6,15 @@ Load a grocery transactions CSV and write a SQLite DB with two tables:
 
 import argparse
 import sqlite3
-import pandas as pd
 from collections import Counter
 from itertools import combinations
 from pathlib import Path
 
+import pandas as pd
+
 CSV_PATH = Path("data/Supermarket_dataset_PAI.csv")
 SQLITE_PATH = Path("data/co_occurrences.sqlite")
+
 
 def build_purchase_id(df: pd.DataFrame) -> pd.Series:
     date_str = pd.to_datetime(df["Date"], format="%d-%m-%Y").dt.strftime("%Y%m%d")
@@ -57,13 +59,14 @@ def write_sqlite(items: pd.Index, pair_counts: Counter, out_path: Path) -> None:
             """
         )
 
-        cur.executemany("INSERT INTO items(name) VALUES (?)", [(item,) for item in items])
+        cur.executemany(
+            "INSERT INTO items(name) VALUES (?)", [(item,) for item in items]
+        )
         conn.commit()
 
         item_id_map = {name: idx + 1 for idx, name in enumerate(items)}
         rows = [
-            (item_id_map[a], item_id_map[b], cnt)
-            for (a, b), cnt in pair_counts.items()
+            (item_id_map[a], item_id_map[b], cnt) for (a, b), cnt in pair_counts.items()
         ]
         cur.executemany(
             "INSERT INTO co_occurrences(item1_id, item2_id, count) VALUES (?, ?, ?)",
@@ -102,7 +105,9 @@ def main() -> None:
     df = pd.read_csv(csv_path)
     items, pair_counts = compute_co_occurrences(df)
     write_sqlite(items, pair_counts, out_path)
-    print(f"Wrote {len(items)} items and {len(pair_counts)} co-occurrence rows to {out_path}")
+    print(
+        f"Wrote {len(items)} items and {len(pair_counts)} co-occurrence rows to {out_path}"
+    )
 
 
 if __name__ == "__main__":

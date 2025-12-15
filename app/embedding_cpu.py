@@ -103,10 +103,7 @@ def recommend_for_basket(
         return []
     sims = vecs[candidate_idx] @ basket_vec
     order = np.argsort(-sims)[:top_k]
-    return [
-        (items[candidate_idx[i]], float(sims[i]))
-        for i in order
-    ]
+    return [(items[candidate_idx[i]], float(sims[i])) for i in order]
 
 
 def recommend_for_customer(
@@ -130,7 +127,4 @@ def recommend_for_customer(
         return []
     sims = vecs[candidate_idx] @ profile
     order = np.argsort(-sims)[:top_k]
-    return [
-        (items[candidate_idx[i]], float(sims[i]))
-        for i in order
-    ]
+    return [(items[candidate_idx[i]], float(sims[i])) for i in order]
