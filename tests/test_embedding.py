@@ -10,9 +10,13 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from app.co_occurrence_store import CoOccurrenceStore  # type: ignore
-from app.embedding_cpu import (build_dense_matrix,  # type: ignore
-                               compute_svd_embeddings, recommend_for_basket,
-                               recommend_for_customer, recommend_for_item)
+from app.embedding_cpu import (
+    build_dense_matrix,  # type: ignore
+    compute_svd_embeddings,
+    recommend_for_basket,
+    recommend_for_customer,
+    recommend_for_item,
+)
 
 
 class EmbeddingTests(unittest.TestCase):

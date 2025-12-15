@@ -20,9 +20,14 @@ import sys
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app import (build_dense_matrix, compute_svd_embeddings,  # type: ignore
-                 recommend_for_basket, recommend_for_item, top_pairs,
-                 top_with_item)
+from app import (
+    build_dense_matrix,
+    compute_svd_embeddings,  # type: ignore
+    recommend_for_basket,
+    recommend_for_item,
+    top_pairs,
+    top_with_item,
+)
 from app.sqlite_to_coo import load_store  # type: ignore
 
 DEFAULT_DB = ROOT / "data" / "co_occurrences.sqlite"

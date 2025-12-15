@@ -26,16 +26,23 @@ import pandas as pd
 if __package__ is None or __package__ == "":
     sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from app import (CoOccurrenceStore, are_often_copurchased,  # type: ignore
-                 build_dense_matrix, compute_co_occurrences,
-                 compute_svd_embeddings, recommend_for_basket,
-                 recommend_for_customer, recommend_for_item, top_pairs,
-                 top_with_item, write_sqlite)
+from app import (
+    CoOccurrenceStore,
+    are_often_copurchased,  # type: ignore
+    build_dense_matrix,
+    compute_co_occurrences,
+    compute_svd_embeddings,
+    recommend_for_basket,
+    recommend_for_customer,
+    recommend_for_item,
+    top_pairs,
+    top_with_item,
+    write_sqlite,
+)
 from app.asci_table import table_draw  # type: ignore
 from app.csv_to_sqlite import CSV_PATH, SQLITE_PATH
 from app.sqlite_to_coo import load_store  # type: ignore
-from app.visualize_graph import \
-    run_interactive as visualize_interactive  # type: ignore
+from app.visualize_graph import run_interactive as visualize_interactive  # type: ignore
 
 
 def help_command() -> None:
