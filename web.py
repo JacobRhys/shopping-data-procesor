@@ -7,11 +7,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List, Optional, Sequence
 
-from flask import Flask, render_template, request
-import numpy as np
 import networkx as nx
-import plotly.graph_objects as go
+import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
+from flask import Flask, render_template, request
 
 # Ensure local imports work whether run as script or module.
 ROOT = Path(__file__).resolve().parent
@@ -20,14 +20,9 @@ import sys
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app import (  # type: ignore
-    build_dense_matrix,
-    compute_svd_embeddings,
-    recommend_for_basket,
-    recommend_for_item,
-    top_pairs,
-    top_with_item,
-)
+from app import (build_dense_matrix, compute_svd_embeddings,  # type: ignore
+                 recommend_for_basket, recommend_for_item, top_pairs,
+                 top_with_item)
 from app.sqlite_to_coo import load_store  # type: ignore
 
 DEFAULT_DB = ROOT / "data" / "co_occurrences.sqlite"
@@ -138,7 +133,9 @@ def dashboard():
                 rec_item_rows = recommend_for_item(items, emb, item, top_k=top_n)
             if basket_raw:
                 basket_items = [p.strip() for p in basket_raw.split(",") if p.strip()]
-                rec_basket_rows = recommend_for_basket(items, emb, basket_items, top_k=top_n)
+                rec_basket_rows = recommend_for_basket(
+                    items, emb, basket_items, top_k=top_n
+                )
             network_html = _network_html(STORE, top_edges=180, min_count=1)
         except Exception as exc:  # pragma: no cover - defensive for runtime
             error_msg = str(exc)
